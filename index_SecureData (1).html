@@ -1,0 +1,1484 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SecureData — Seguridad en Gestión de Datos</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --surface: #111827;
+    --surface2: #1a2235;
+    --accent: #00d4aa;
+    --accent2: #ff6b35;
+    --accent3: #7c3aed;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --border: #1e293b;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Syne', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── BACKGROUND GRID ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,212,170,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,170,0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── SIDEBAR NAV ── */
+  .sidebar {
+    position: fixed;
+    left: 0; top: 0; bottom: 0;
+    width: 260px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 2rem 0;
+    z-index: 100;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sidebar-logo {
+    padding: 0 1.5rem 2rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 1.5rem;
+  }
+
+  .sidebar-logo .logo-text {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--accent);
+    letter-spacing: -0.5px;
+  }
+
+  .sidebar-logo .logo-sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    margin-top: 0.2rem;
+    letter-spacing: 0.05em;
+  }
+
+  .nav-section-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-transform: uppercase;
+    padding: 0 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.6rem 1.5rem;
+    cursor: pointer;
+    color: var(--muted);
+    font-size: 0.85rem;
+    transition: all 0.2s;
+    border-left: 2px solid transparent;
+    text-decoration: none;
+  }
+
+  .nav-item:hover { color: var(--text); background: rgba(255,255,255,0.03); }
+  .nav-item.active { color: var(--accent); border-left-color: var(--accent); background: rgba(0,212,170,0.06); }
+
+  .nav-item .icon { font-size: 0.9rem; width: 16px; text-align: center; }
+  .nav-spacer { height: 1.5rem; }
+
+  /* ── MAIN ── */
+  .main {
+    margin-left: 260px;
+    padding: 0;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    padding: 5rem 3rem 4rem;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::after {
+    content: '';
+    position: absolute;
+    right: -100px; top: -100px;
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(0,212,170,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--accent);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    background: rgba(0,212,170,0.1);
+    border: 1px solid rgba(0,212,170,0.2);
+    padding: 0.25rem 0.75rem;
+    border-radius: 2px;
+    display: inline-block;
+    margin-bottom: 1.5rem;
+  }
+
+  .hero h1 {
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    font-weight: 800;
+    line-height: 1.1;
+    max-width: 700px;
+  }
+
+  .hero h1 span { color: var(--accent); }
+
+  .hero p {
+    margin-top: 1.2rem;
+    max-width: 580px;
+    color: var(--muted);
+    line-height: 1.7;
+    font-size: 0.95rem;
+  }
+
+  .hero-stats {
+    display: flex;
+    gap: 2rem;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .stat {
+    text-align: left;
+  }
+
+  .stat-num {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--accent);
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-top: 0.2rem;
+  }
+
+  /* ── CONTENT AREA ── */
+  .content-area {
+    padding: 2.5rem 3rem;
+  }
+
+  /* ── SECTION ── */
+  .section {
+    display: none;
+  }
+  .section.active { display: block; }
+
+  .section-header {
+    margin-bottom: 2rem;
+  }
+
+  .section-number {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    margin-bottom: 0.4rem;
+  }
+
+  .section-title {
+    font-size: 1.8rem;
+    font-weight: 800;
+  }
+
+  .section-subtitle {
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin-top: 0.4rem;
+  }
+
+  /* ── CARDS ── */
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.25rem;
+    margin-bottom: 2rem;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1.5rem;
+    transition: border-color 0.2s, transform 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s;
+  }
+
+  .card:hover { border-color: rgba(0,212,170,0.3); transform: translateY(-2px); }
+  .card:hover::before { transform: scaleX(1); }
+
+  .card-icon {
+    font-size: 1.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .card h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 0.6rem;
+    color: var(--text);
+  }
+
+  .card p {
+    font-size: 0.82rem;
+    color: var(--muted);
+    line-height: 1.65;
+  }
+
+  /* ── TUTORIAL STEPS ── */
+  .tutorial {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+  }
+
+  .tutorial-header {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .tutorial-header:hover { background: rgba(255,255,255,0.02); }
+
+  .step-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    background: var(--accent);
+    color: var(--bg);
+    padding: 0.15rem 0.5rem;
+    border-radius: 2px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .step-badge.warning { background: var(--warning); }
+  .step-badge.danger { background: var(--danger); }
+  .step-badge.purple { background: var(--accent3); }
+
+  .tutorial-header h4 { font-size: 0.95rem; font-weight: 700; flex: 1; }
+
+  .toggle-icon {
+    color: var(--muted);
+    font-size: 0.8rem;
+    transition: transform 0.2s;
+  }
+  .tutorial.open .toggle-icon { transform: rotate(180deg); }
+
+  .tutorial-body {
+    display: none;
+    padding: 1.5rem;
+  }
+  .tutorial.open .tutorial-body { display: block; }
+
+  .tutorial-body p {
+    font-size: 0.85rem;
+    color: var(--muted);
+    line-height: 1.7;
+    margin-bottom: 1rem;
+  }
+
+  /* ── CODE BLOCK ── */
+  .code-block {
+    background: #060a12;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 1rem 0;
+    position: relative;
+  }
+
+  .code-bar {
+    padding: 0.4rem 1rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .code-lang {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .copy-btn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    background: none;
+    border: 1px solid var(--border);
+    padding: 0.2rem 0.5rem;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .copy-btn:hover { color: var(--accent); border-color: var(--accent); }
+  .copy-btn.copied { color: var(--success); border-color: var(--success); }
+
+  .code-block pre {
+    padding: 1rem 1.2rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    color: #a8d8c8;
+    overflow-x: auto;
+    line-height: 1.6;
+    white-space: pre;
+  }
+
+  .code-block pre .comment { color: #4a6a5a; }
+  .code-block pre .cmd { color: #00d4aa; }
+  .code-block pre .flag { color: #ff6b35; }
+  .code-block pre .string { color: #fbbf24; }
+
+  /* ── ALERT BOXES ── */
+  .alert {
+    border-radius: 4px;
+    padding: 0.9rem 1.2rem;
+    margin: 1rem 0;
+    font-size: 0.82rem;
+    line-height: 1.6;
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+  }
+
+  .alert-icon { font-size: 1rem; flex-shrink: 0; margin-top: 0.05rem; }
+  .alert-info { background: rgba(0,212,170,0.08); border: 1px solid rgba(0,212,170,0.2); color: #7dd3c0; }
+  .alert-warn { background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.2); color: #fbbf24; }
+  .alert-danger { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); color: #f87171; }
+
+  /* ── TABLE ── */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8rem;
+    margin: 1rem 0;
+  }
+
+  .data-table th {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    padding: 0.6rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    background: rgba(255,255,255,0.02);
+  }
+
+  .data-table td {
+    padding: 0.6rem 1rem;
+    border-bottom: 1px solid rgba(30,41,59,0.6);
+    color: var(--text);
+  }
+
+  .data-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+  .badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    padding: 0.15rem 0.4rem;
+    border-radius: 2px;
+    font-weight: 700;
+  }
+
+  .badge-green { background: rgba(16,185,129,0.15); color: var(--success); border: 1px solid rgba(16,185,129,0.3); }
+  .badge-red { background: rgba(239,68,68,0.15); color: var(--danger); border: 1px solid rgba(239,68,68,0.3); }
+  .badge-yellow { background: rgba(245,158,11,0.15); color: var(--warning); border: 1px solid rgba(245,158,11,0.3); }
+
+  /* ── PROGRESS TRACKER ── */
+  .progress-track {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .progress-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .progress-bar-bg {
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), #00a890);
+    border-radius: 2px;
+    width: 0%;
+    transition: width 0.5s ease;
+  }
+
+  /* ── CHECKLIST ── */
+  .checklist { list-style: none; margin: 0.75rem 0; }
+  .checklist li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.5rem 0;
+    font-size: 0.85rem;
+    color: var(--text);
+    border-bottom: 1px solid rgba(30,41,59,0.5);
+    cursor: pointer;
+  }
+  .checklist li:last-child { border-bottom: none; }
+
+  .check-box {
+    width: 16px; height: 16px;
+    border: 1px solid var(--muted);
+    border-radius: 2px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.7rem;
+    flex-shrink: 0;
+    margin-top: 2px;
+    transition: all 0.2s;
+  }
+
+  .checklist li.done .check-box {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--bg);
+  }
+
+  .checklist li.done > span { text-decoration: line-through; color: var(--muted); }
+
+  /* ── TABS ── */
+  .tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 1.5rem; }
+  .tab {
+    padding: 0.6rem 1.2rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* ── SECTION DIVIDER ── */
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 2rem 0;
+  }
+
+  .subsection-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 0.75rem;
+    padding-top: 0.5rem;
+  }
+
+  .subsection-title span {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--accent);
+    margin-right: 0.5rem;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    .sidebar { width: 220px; }
+    .main { margin-left: 220px; }
+    .hero { padding: 3rem 1.5rem 2.5rem; }
+    .content-area { padding: 2rem 1.5rem; }
+  }
+  @media (max-width: 640px) {
+    .sidebar { display: none; }
+    .main { margin-left: 0; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── SIDEBAR ── -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-text">🛡 SecureData</div>
+    <div class="logo-sub">// Proyecto Final · Seguridad</div>
+  </div>
+
+  <div class="nav-section-title">Inicio</div>
+  <a class="nav-item active" onclick="showSection('home', this)">
+    <span class="icon">⊞</span> Resumen General
+  </a>
+
+  <div class="nav-spacer"></div>
+  <div class="nav-section-title">3.1 Gestión de Datos</div>
+  <a class="nav-item" onclick="showSection('acceso', this)">
+    <span class="icon">🔑</span> Políticas de Acceso
+  </a>
+  <a class="nav-item" onclick="showSection('auditoria', this)">
+    <span class="icon">📋</span> Auditoría
+  </a>
+
+  <div class="nav-spacer"></div>
+  <div class="nav-section-title">3.2 Borrado de Datos</div>
+  <a class="nav-item" onclick="showSection('borrado', this)">
+    <span class="icon">🗑</span> Borrado Seguro
+  </a>
+  <a class="nav-item" onclick="showSection('remanencia', this)">
+    <span class="icon">💾</span> Remanencia de Memoria
+  </a>
+
+  <div class="nav-spacer"></div>
+  <div class="nav-section-title">3.3 Prevención</div>
+  <a class="nav-item" onclick="showSection('dlp', this)">
+    <span class="icon">🧱</span> Prevención de Filtración
+  </a>
+
+  <div class="nav-spacer"></div>
+  <div class="nav-section-title">3.4 Privacidad</div>
+  <a class="nav-item" onclick="showSection('privacidad', this)">
+    <span class="icon">🔒</span> Privacidad de Datos
+  </a>
+
+  <div class="nav-spacer"></div>
+  <div class="nav-section-title">Herramientas</div>
+  <a class="nav-item" onclick="showSection('tshark', this)">
+    <span class="icon">📡</span> TShark / Wireshark
+  </a>
+</nav>
+
+<!-- ── MAIN CONTENT ── -->
+<div class="main">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-tag">// Seguridad Informática · 2026</div>
+    <h1>Seguridad en la<br><span>Gestión de Datos</span></h1>
+    <p>Aprende comandos, técnicas y metodologías esenciales para proteger datos, prevenir filtraciones y garantizar la privacidad. Tutoriales paso a paso con ejemplos reales en Linux.</p>
+    <div class="hero-stats">
+      <div class="stat"><div class="stat-num">4</div><div class="stat-label">Módulos</div></div>
+      <div class="stat"><div class="stat-num">20+</div><div class="stat-label">Comandos</div></div>
+      <div class="stat"><div class="stat-num">6</div><div class="stat-label">Estándares</div></div>
+    </div>
+  </div>
+
+  <!-- CONTENT AREA -->
+  <div class="content-area">
+
+    <!-- ══════════════════ HOME ══════════════════ -->
+    <div id="home" class="section active">
+      <div class="section-header">
+        <div class="section-number">// RESUMEN</div>
+        <div class="section-title">Mapa del Proyecto</div>
+        <div class="section-subtitle">Selecciona un módulo del menú lateral para comenzar el tutorial</div>
+      </div>
+
+      <div class="cards-grid">
+        <div class="card" onclick="showSection('acceso', document.querySelector('[onclick*=acceso]'))">
+          <div class="card-icon">🔑</div>
+          <h3>3.1.1 Políticas de Acceso y Auditoría</h3>
+          <p>Control de quién puede acceder a qué recursos y cuándo. Incluye RBAC, principio de mínimo privilegio y logs de auditoría.</p>
+        </div>
+        <div class="card" onclick="showSection('borrado', document.querySelector('[onclick*=borrado]'))">
+          <div class="card-icon">🗑</div>
+          <h3>3.2.1 Borrado Seguro y Destrucción Física</h3>
+          <p>Técnicas de sobreescritura como DoD 5220.22-M, shred, wipe, y destrucción física de medios de almacenamiento.</p>
+        </div>
+        <div class="card" onclick="showSection('remanencia', document.querySelector('[onclick*=remanencia]'))">
+          <div class="card-icon">💾</div>
+          <h3>3.2.2 Remanencia de Memoria y Riesgos</h3>
+          <p>Fenómeno por el cual datos persisten en medios después de eliminarse. Riesgos en RAM, SSD y HDD.</p>
+        </div>
+        <div class="card" onclick="showSection('dlp', document.querySelector('[onclick*=dlp]'))">
+          <div class="card-icon">🧱</div>
+          <h3>3.3 Prevención de Filtración de Datos</h3>
+          <p>Herramientas DLP, monitoreo de tráfico con TShark, reglas de firewall y detección de exfiltración.</p>
+        </div>
+        <div class="card" onclick="showSection('privacidad', document.querySelector('[onclick*=privacidad]'))">
+          <div class="card-icon">🔒</div>
+          <h3>3.4 Privacidad de Datos</h3>
+          <p>GDPR, LFPDPPP, anonimización, pseudonimización y buenas prácticas de privacidad por diseño.</p>
+        </div>
+        <div class="card" onclick="showSection('tshark', document.querySelector('[onclick*=tshark]'))">
+          <div class="card-icon">📡</div>
+          <h3>TShark — Referencia de Comandos</h3>
+          <p>Guía completa de todos los comandos de captura y análisis de tráfico vistos en clase.</p>
+        </div>
+      </div>
+
+      <div class="alert alert-info">
+        <span class="alert-icon">ℹ</span>
+        <span>Este sitio fue implementado con <strong>Flask + Apache2</strong> en Linux. Cada sección incluye comandos ejecutables, explicaciones teóricas y ejemplos prácticos para comprender la seguridad de datos.</span>
+      </div>
+    </div>
+
+    <!-- ══════════════════ ACCESO ══════════════════ -->
+    <div id="acceso" class="section">
+      <div class="section-header">
+        <div class="section-number">// 3.1.1</div>
+        <div class="section-title">Políticas de Acceso</div>
+        <div class="section-subtitle">Control de acceso a datos y recursos del sistema</div>
+      </div>
+
+      <p style="color:var(--muted); font-size:.88rem; line-height:1.75; margin-bottom:1.5rem;">
+        Una <strong style="color:var(--text)">política de acceso</strong> define reglas que determinan qué usuarios, grupos o procesos pueden leer, escribir o ejecutar recursos específicos dentro de un sistema. Su objetivo es aplicar el <em>principio de mínimo privilegio</em>: cada entidad recibe únicamente los permisos estrictamente necesarios para su función, reduciendo la superficie de ataque en caso de compromiso de una cuenta.
+      </p>
+
+      <div class="tabs">
+        <div class="tab active" onclick="switchTab(this, 'tab-rbac')">RBAC</div>
+        <div class="tab" onclick="switchTab(this, 'tab-linux-perms')">Permisos Linux</div>
+        <div class="tab" onclick="switchTab(this, 'tab-sudo')">Sudo y PAM</div>
+      </div>
+
+      <div id="tab-rbac" class="tab-content active">
+        <div class="subsection-title"><span>01</span> Control de Acceso Basado en Roles (RBAC)</div>
+        <p style="color:var(--muted); font-size:.85rem; line-height:1.7; margin-bottom:1rem;">
+          RBAC (Role-Based Access Control) asigna permisos a roles, no directamente a usuarios. Un usuario hereda los permisos del rol al que pertenece. Es el modelo más usado en sistemas empresariales por su escalabilidad.
+        </p>
+        <div class="cards-grid">
+          <div class="card">
+            <div class="card-icon">👤</div>
+            <h3>Crear usuario y grupo</h3>
+            <p>Agrupa usuarios según su función (analistas, admins, auditores) para aplicar permisos uniformes.</p>
+          </div>
+          <div class="card">
+            <div class="card-icon">🔐</div>
+            <h3>Asignar permisos mínimos</h3>
+            <p>Cada rol recibe sólo los permisos necesarios. Un analista de datos no necesita acceso root.</p>
+          </div>
+        </div>
+        <div class="code-block">
+          <div class="code-bar">
+            <span class="code-lang">bash — Gestión de usuarios y grupos</span>
+            <button class="copy-btn" onclick="copyCode(this)">copiar</button>
+          </div>
+          <pre><span class="comment"># Crear un grupo para analistas de datos</span>
+<span class="cmd">sudo groupadd</span> data_analysts
+
+<span class="comment"># Crear usuario y asignarlo al grupo</span>
+<span class="cmd">sudo useradd</span> <span class="flag">-m -G</span> data_analysts juan_perez
+<span class="cmd">sudo passwd</span> juan_perez
+
+<span class="comment"># Ver grupos de un usuario</span>
+<span class="cmd">groups</span> juan_perez
+
+<span class="comment"># Dar permisos de lectura sobre un directorio al grupo</span>
+<span class="cmd">sudo chown</span> <span class="flag">-R</span> root:data_analysts /data/reportes
+<span class="cmd">sudo chmod</span> <span class="flag">-R</span> 750 /data/reportes
+<span class="comment"># 7=rwx (dueño), 5=r-x (grupo), 0=--- (otros)</span></pre>
+        </div>
+      </div>
+
+      <div id="tab-linux-perms" class="tab-content">
+        <div class="subsection-title"><span>02</span> Permisos en Linux</div>
+        <p style="color:var(--muted); font-size:.85rem; line-height:1.7; margin-bottom:1rem;">
+          Linux usa un modelo de permisos de 3 niveles: dueño (owner), grupo y otros. Cada nivel puede tener permisos de lectura (r=4), escritura (w=2) y ejecución (x=1). Se combinan sumando sus valores.
+        </p>
+        <div class="code-block">
+          <div class="code-bar">
+            <span class="code-lang">bash — chmod y chown</span>
+            <button class="copy-btn" onclick="copyCode(this)">copiar</button>
+          </div>
+          <pre><span class="comment"># Ver permisos de archivos</span>
+<span class="cmd">ls</span> <span class="flag">-la</span> /data/
+
+<span class="comment"># Permisos exactos: dueño rwx, grupo r--, otros ---</span>
+<span class="cmd">chmod</span> 740 archivo_confidencial.txt
+
+<span class="comment"># Permisos simbólicos: quitar ejecución a "otros"</span>
+<span class="cmd">chmod</span> o-x script.sh
+
+<span class="comment"># Cambiar dueño y grupo</span>
+<span class="cmd">sudo chown</span> admin:data_analysts /data/base_clientes.csv
+
+<span class="comment"># Encontrar archivos con permisos peligrosos (world-writable)</span>
+<span class="cmd">find</span> /etc <span class="flag">-perm</span> -002 <span class="flag">-type</span> f 2>/dev/null</pre>
+        </div>
+
+        <div class="alert alert-warn">
+          <span class="alert-icon">⚠</span>
+          <span>Nunca uses <code>chmod 777</code> en producción. Significa que cualquier usuario del sistema puede leer, escribir y ejecutar ese archivo.</span>
+        </div>
+      </div>
+
+      <div id="tab-sudo" class="tab-content">
+        <div class="subsection-title"><span>03</span> Sudo y PAM</div>
+        <p style="color:var(--muted); font-size:.85rem; line-height:1.7; margin-bottom:1rem;">
+          <strong>sudo</strong> permite ejecutar comandos como root de forma controlada y registrada. PAM (Pluggable Authentication Modules) es el framework que gestiona autenticación en Linux: contraseñas, biometría, tokens, etc.
+        </p>
+        <div class="code-block">
+          <div class="code-bar">
+            <span class="code-lang">bash — configurar sudoers</span>
+            <button class="copy-btn" onclick="copyCode(this)">copiar</button>
+          </div>
+          <pre><span class="comment"># Editar sudoers de forma segura</span>
+<span class="cmd">sudo visudo</span>
+
+<span class="comment"># Dar acceso sudo sólo a comandos específicos</span>
+<span class="string">juan_perez ALL=(ALL) /usr/bin/systemctl restart apache2</span>
+
+<span class="comment"># Ver quién tiene sudo</span>
+<span class="cmd">grep</span> <span class="flag">-Po</span> '^sudo.+:\K.*$' /etc/group
+
+<span class="comment"># Ver log de uso de sudo</span>
+<span class="cmd">sudo grep</span> sudo /var/log/auth.log | <span class="cmd">tail</span> <span class="flag">-20</span></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════ AUDITORÍA ══════════════════ -->
+    <div id="auditoria" class="section">
+      <div class="section-header">
+        <div class="section-number">// 3.1.1</div>
+        <div class="section-title">Auditoría de Accesos</div>
+        <div class="section-subtitle">Registro y análisis de quién accede, cuándo y desde dónde</div>
+      </div>
+
+      <p style="color:var(--muted); font-size:.88rem; line-height:1.75; margin-bottom:1.5rem;">
+        La <strong style="color:var(--text)">auditoría</strong> es el proceso de registrar sistemáticamente eventos del sistema para detectar accesos no autorizados, errores y patrones sospechosos. El demonio <code>auditd</code> de Linux captura llamadas al kernel, accesos a archivos y cambios de configuración. Es un requisito en normas como ISO 27001 y PCI-DSS.
+      </p>
+
+      <div class="tutorial">
+        <div class="tutorial-header" onclick="toggleTutorial(this)">
+          <span class="step-badge">PASO 1</span>
+          <h4>Instalar y activar auditd</h4>
+          <span class="toggle-icon">▼</span>
+        </div>
+        <div class="tutorial-body">
+          <p>auditd es el servicio de auditoría estándar en Linux. Registra eventos del kernel según reglas configurables.</p>
+          <div class="code-block">
+            <div class="code-bar">
+              <span class="code-lang">bash</span>
+              <button class="copy-btn" onclick="copyCode(this)">copiar</button>
+            </div>
+            <pre><span class="cmd">sudo apt</span> install auditd audispd-plugins <span class="flag">-y</span>
+<span class="cmd">sudo systemctl</span> enable auditd
+<span class="cmd">sudo systemctl</span> start auditd
+<span class="cmd">sudo systemctl</span> status auditd</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="tutorial">
+        <div class="tutorial-header" onclick="toggleTutorial(this)">
+          <span class="step-badge">PASO 2</span>
+          <h4>Definir reglas de auditoría</h4>
+          <span class="toggle-icon">▼</span>
+        </div>
+        <div class="tutorial-body">
+          <p>Las reglas indican qué archivos o llamadas al sistema monitorear. Se pueden definir en tiempo real con <code>auditctl</code> o persistir en <code>/etc/audit/rules.d/</code>.</p>
+          <div class="code-block">
+            <div class="code-bar">
+              <span class="code-lang">bash — reglas de auditoría</span>
+              <button class="copy-btn" onclick="copyCode(this)">copiar</button>
+            </div>
+            <pre><span class="comment"># Auditar accesos a /etc/passwd (identidad de usuarios)</span>
+<span class="cmd">sudo auditctl</span> <span class="flag">-w</span> /etc/passwd <span class="flag">-p</span> rwa <span class="flag">-k</span> user_mgmt
+
+<span class="comment"># Auditar directorio de datos sensibles</span>
+<span class="cmd">sudo auditctl</span> <span class="flag">-w</span> /data/clientes/ <span class="flag">-p</span> rwxa <span class="flag">-k</span> datos_sensibles
+
+<span class="comment"># Ver reglas activas</span>
+<span class="cmd">sudo auditctl</span> <span class="flag">-l</span>
+
+<span class="comment"># Buscar eventos por clave</span>
+<span class="cmd">sudo ausearch</span> <span class="flag">-k</span> datos_sensibles <span class="flag">--format</span> text | <span class="cmd">tail</span> <span class="flag">-30</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="tutorial">
+        <div class="tutorial-header" onclick="toggleTutorial(this)">
+          <span class="step-badge">PASO 3</span>
+          <h4>Analizar logs con aureport</h4>
+          <span class="toggle-icon">▼</span>
+        </div>
+        <div class="tutorial-body">
+          <p><code>aureport</code> genera resúmenes estadísticos del log de auditoría: fallos de login, comandos ejecutados, archivos accedidos, entre otros.</p>
+          <div class="code-block">
+            <div class="code-bar">
+              <span class="code-lang">bash</span>
+              <button class="copy-btn" onclick="copyCode(this)">copiar</button>
+            </div>
+            <pre><span class="comment"># Resumen general de eventos</span>
+<span class="cmd">sudo aureport</span>
+
+<span class="comment"># Reporte de autenticaciones fallidas</span>
+<span class="cmd">sudo aureport</span> <span class="flag">--auth --failed</span>
+
+<span class="comment"># Reporte de archivos accedidos</span>
+<span class="cmd">sudo aureport</span> <span class="flag">-f</span>
+
+<span class="comment"># Logs de inicio de sesión hoy</span>
+<span class="cmd">sudo aureport</span> <span class="flag">-l --start</span> today</pre>
+          </div>
+          <div class="alert alert-info">
+            <span class="alert-icon">ℹ</span>
+            <span>Los logs de auditoría se almacenan en <code>/var/log/audit/audit.log</code>. Se rotan automáticamente según configuración en <code>/etc/audit/auditd.conf</code>.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="subsection-title" style="margin-top:1.5rem;"><span>Ejemplo</span> Log de accesos simulado</div>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Timestamp</th>
+            <th>Usuario</th>
+            <th>Archivo</th>
+            <th>Acción</th>
+            <th>Resultado</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>2026-05-11 09:02:14</td><td>juan_perez</td><td>/data/clientes/bd.csv</td><td>READ</td><td><span class="badge badge-green">OK</span></td></tr>
+          <tr><td>2026-05-11 09:15:33</td><td>ext_user</td><td>/etc/shadow</td><td>READ</td><td><span class="badge badge-red">DENIED</span></td></tr>
+          <tr><td>2026-05-11 10:44:01</td><td>admin</td><td>/etc/passwd</td><td>WRITE</td><td><span class="badge badge-yellow">ALERT</span></td></tr>
+          <tr><td>2026-05-11 11:30:22</td><td>maria_lopez</td><td>/data/reportes/q1.pdf</td><td>READ</td><td><span class="badge badge-green">OK</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ══════════════════ BORRADO ══════════════════ -->
+    <div id="borrado" class="section">
+      <div class="section-header">
+        <div class="section-number">// 3.2.1</div>
+        <div class="section-title">Borrado Seguro y Destrucción Física</div>
+        <div class="section-subtitle">Técnicas para eliminar datos de forma irrecuperable</div>
+      </div>
+
+      <p style="color:var(--muted); font-size:.88rem; line-height:1.75; margin-bottom:1.5rem;">
+        Eliminar un archivo con <code>rm</code> o vaciar la papelera <strong style="color:var(--text)">no borra el contenido</strong>: solo elimina el puntero del sistema de archivos. Los datos permanecen en el disco hasta que son sobreescritos. El borrado seguro consiste en sobreescribir el espacio con patrones específicos (ceros, unos o datos aleatorios) antes de eliminar el archivo, haciendo su recuperación computacionalmente inviable.
+      </p>
+
+      <div class="cards-grid">
+        <div class="card">
+          <div class="card-icon">🔢</div>
+          <h3>Estándar DoD 5220.22-M</h3>
+          <p>El Departamento de Defensa de EE.UU. define 3 pasadas: sobreescritura con ceros, con unos, luego con datos aleatorios. Aceptado internacionalmente.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">🌀</div>
+          <h3>Método Gutmann</h3>
+          <p>35 pasadas con patrones específicos, diseñado para discos magnéticos. Para SSD modernos, 3-7 pasadas son suficientes y más eficientes.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">⚡</div>
+          <h3>Destrucción física</h3>
+          <p>Cuando el cifrado previo no fue posible: desmagnetización (degaussing), trituración o incineración del medio físico.</p>
+        </div>
+      </div>
+
+      <div class="tutorial">
+        <div class="tutorial-header" onclick="toggleTutorial(this)">
+          <span class="step-badge">shred</span>
+          <h4>Sobreescritura segura con shred</h4>
+          <span class="toggle-icon">▼</span>
+        </div>
+        <div class="tutorial-body">
+          <p><code>shred</code> es la herramienta estándar de GNU para destruir archivos de forma segura. Sobreescribe el contenido varias veces antes de eliminar.</p>
+          <div class="code-block">
+            <div class="code-bar">
+              <span class="code-lang">bash — shred</span>
+              <button class="copy-btn" onclick="copyCode(this)">copiar</button>
+            </div>
+            <pre><span class="comment"># 3 pasadas + eliminar archivo + modo verbose</span>
+<span class="cmd">shred</span> <span class="flag">-v -n 3 -z -u</span> archivo_confidencial.txt
+
+<span class="comment"># -n 3  → número de pasadas (DoD usa 3)</span>
+<span class="comment"># -z    → añade pasada final de ceros (oculta la sobreescritura)</span>
+<span class="comment"># -u    → elimina el archivo al terminar</span>
+<span class="comment"># -v    → muestra progreso</span>
+
+<span class="comment"># Borrar un disco completo (CUIDADO: irreversible)</span>
+<span class="cmd">sudo shred</span> <span class="flag">-v -n 3 -z</span> /dev/sdb</pre>
+          </div>
+          <div class="alert alert-danger">
+            <span class="alert-icon">⛔</span>
+            <span><strong>shred no es 100% efectivo en SSD</strong> por el wear-leveling. Para SSD usa <code>blkdiscard</code> o el comando ATA Secure Erase del fabricante.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="tutorial">
+        <div class="tutorial-header" onclick="toggleTutorial(this)">
+          <span class="step-badge">wipe</span>
+          <h4>Sobreescritura con wipe y dd</h4>
+          <span class="toggle-icon">▼</span>
+        </div>
+        <div class="tutorial-body">
+          <div class="code-block">
+            <div class="code-bar">
+              <span class="code-lang">bash</span>
+              <button class="copy-btn" onclick="copyCode(this)">copiar</button>
+            </div>
+            <pre><span class="comment"># Instalar wipe</span>
+<span class="cmd">sudo apt</span> install wipe <span class="flag">-y</span>
+
+<span class="comment"># Borrar archivo con wipe (modo rápido)</span>
+<span class="cmd">wipe</span> <span class="flag">-f -r</span> /data/secreto.csv
+
+<span class="comment"># Sobreescribir disco con dd (ceros)</span>
+<span class="cmd">sudo dd</span> <span class="flag">if</span>=/dev/zero <span class="flag">of</span>=/dev/sdb <span class="flag">bs</span>=4M <span class="flag">status</span>=progress
+
+<span class="comment"># Sobreescribir con datos aleatorios (/dev/urandom)</span>
+<span class="cmd">sudo dd</span> <span class="flag">if</span>=/dev/urandom <span class="flag">of</span>=/dev/sdb <span class="flag">bs</span>=4M <span class="flag">status</span>=progress
+
+<span class="comment"># SSD: Secure Erase con hdparm</span>
+<span class="cmd">sudo hdparm</span> <span class="flag">--security-erase</span> NULL /dev/sda</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="progress-track">
+        <div class="progress-label">Tu progreso en Borrado Seguro</div>
+        <div class="progress-bar-bg"><div class="progress-fill" id="prog-borrado" style="width:0%"></div></div>
+      </div>
+      <ul class="checklist" id="checklist-borrado">
+        <li onclick="checkItem(this, 'prog-borrado', 'checklist-borrado')"><span class="check-box"></span><span>Entendí la diferencia entre rm y borrado seguro</span></li>
+        <li onclick="checkItem(this, 'prog-borrado', 'checklist-borrado')"><span class="check-box"></span><span>Practiqué shred con un archivo de prueba</span></li>
+        <li onclick="checkItem(this, 'prog-borrado', 'checklist-borrado')"><span class="check-box"></span><span>Comprendí el estándar DoD 5220.22-M</span></li>
+        <li onclick="checkItem(this, 'prog-borrado', 'checklist-borrado')"><span class="check-box"></span><span>Entendí las limitaciones en SSD</span></li>
+      </ul>
+    </div>
+
+    <!-- ══════════════════ REMANENCIA ══════════════════ -->
+    <div id="remanencia" class="section">
+      <div class="section-header">
+        <div class="section-number">// 3.2.2</div>
+        <div class="section-title">Remanencia de Memoria</div>
+        <div class="section-subtitle">Persistencia de datos tras su supuesta eliminación</div>
+      </div>
+
+      <p style="color:var(--muted); font-size:.88rem; line-height:1.75; margin-bottom:1.5rem;">
+        La <strong style="color:var(--text)">remanencia de datos</strong> es el fenómeno por el cual información que se creyó eliminada permanece accesible en el medio de almacenamiento. Ocurre en discos magnéticos (HDD), memorias flash (SSD, USB), RAM y cintas. Un atacante con acceso físico al dispositivo puede recuperar esa información usando herramientas forenses como <code>photorec</code>, <code>testdisk</code> o <code>Autopsy</code>.
+      </p>
+
+      <div class="cards-grid">
+        <div class="card">
+          <div class="card-icon">🖴</div>
+          <h3>HDD — Remanencia magnética</h3>
+          <p>Los discos duros guardan datos como campos magnéticos. Incluso después de sobreescribir, pueden quedar "ecos" magnéticos detectables con MFM (Magnetic Force Microscopy). El estándar Gutmann (35 pasadas) fue diseñado para esto.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">⚡</div>
+          <h3>SSD — Wear leveling</h3>
+          <p>Los SSD distribuyen escrituras entre celdas para alargar su vida. El firmware puede mantener copias antiguas en bloques de reserva, inaccesibles para el SO pero recuperables con herramientas de bajo nivel.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">🧠</div>
+          <h3>RAM — Cold boot attack</h3>
+          <p>La memoria RAM retiene datos hasta 1-2 minutos tras apagarse (más tiempo si se congela). Un atacante puede extraer claves de cifrado de la RAM con un ataque de arranque en frío.</p>
+        </div>
+      </div>
+
+      <div class="tutorial">
+        <div class="tutorial-header" onclick="toggleTutorial(this)">
+          <span class="step-badge warning">RIESGO</span>
+          <h4>Demostración: recuperar archivo borrado con photorec</h4>
+          <span class="toggle-icon">▼</span>
+        </div>
+        <div class="tutorial-body">
+          <p>Esta demostración muestra lo fácil que es recuperar datos de un disco sin borrado seguro. <strong>Úsala solo en entornos de laboratorio.</strong></p>
+          <div class="code-block">
+            <div class="code-bar">
+              <span class="code-lang">bash</span>
+              <button class="copy-btn" onclick="copyCode(this)">copiar</button>
+            </div>
+            <pre><span class="comment"># Instalar herramienta forense</span>
+<span class="cmd">sudo apt</span> install testdisk <span class="flag">-y</span>
+
+<span class="comment"># Crear archivo de prueba y borrarlo con rm (sin seguridad)</span>
+<span class="cmd">echo</span> <span class="string">"Datos confidenciales de prueba"</span> > /tmp/test.txt
+<span class="cmd">rm</span> /tmp/test.txt
+
+<span class="comment"># Intentar recuperar con photorec (modo interactivo)</span>
+<span class="cmd">sudo photorec</span> /dev/sda
+
+<span class="comment"># Verificar si los datos son recuperables con strings</span>
+<span class="cmd">sudo strings</span> /dev/sda | <span class="cmd">grep</span> "confidenciales" | <span class="cmd">head</span> <span class="flag">-5</span></pre>
+          </div>
+          <div class="alert alert-warn">
+            <span class="alert-icon">⚠</span>
+            <span>La solución a la remanencia es <strong>cifrar el disco completo desde el inicio</strong> (LUKS en Linux). Así, aunque se recuperen bytes, son texto cifrado ilegible sin la clave.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="tutorial">
+        <div class="tutorial-header" onclick="toggleTutorial(this)">
+          <span class="step-badge">LUKS</span>
+          <h4>Cifrado de disco con LUKS (solución)</h4>
+          <span class="toggle-icon">▼</span>
+        </div>
+        <div class="tutorial-body">
+          <div class="code-block">
+            <div class="code-bar">
+              <span class="code-lang">bash — cifrado LUKS</span>
+              <button class="copy-btn" onclick="copyCode(this)">copiar</button>
+            </div>
+            <pre><span class="comment"># Instalar cryptsetup</span>
+<span class="cmd">sudo apt</span> install cryptsetup <span class="flag">-y</span>
+
+<span class="comment"># Cifrar una partición (ejemplo: /dev/sdb1)</span>
+<span class="cmd">sudo cryptsetup</span> luksFormat /dev/sdb1
+
+<span class="comment"># Abrir (montar) la partición cifrada</span>
+<span class="cmd">sudo cryptsetup</span> luksOpen /dev/sdb1 datos_cifrados
+
+<span class="comment"># Crear sistema de archivos sobre el volumen cifrado</span>
+<span class="cmd">sudo mkfs.ext4</span> /dev/mapper/datos_cifrados
+
+<span class="comment"># Montar</span>
+<span class="cmd">sudo mount</span> /dev/mapper/datos_cifrados /mnt/datos</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════ DLP ══════════════════ -->
+    <div id="dlp" class="section">
+      <div class="section-header">
+        <div class="section-number">// 3.3</div>
+        <div class="section-title">Prevención de Filtración de Datos</div>
+        <div class="section-subtitle">DLP, monitoreo de tráfico y detección de exfiltración</div>
+      </div>
+
+      <p style="color:var(--muted); font-size:.88rem; line-height:1.75; margin-bottom:1.5rem;">
+        La <strong style="color:var(--text)">prevención de pérdida de datos (DLP)</strong> engloba políticas, procesos y herramientas que evitan que información sensible salga de la organización sin autorización. Las filtraciones pueden ser accidentales (empleado que envía el archivo equivocado) o maliciosas (insider threat, malware). Las técnicas incluyen inspección profunda de paquetes, reglas de firewall, monitoreo de endpoints y análisis de comportamiento.
+      </p>
+
+      <div class="tutorial">
+        <div class="tutorial-header" onclick="toggleTutorial(this)">
+          <span class="step-badge">TSHARK</span>
+          <h4>Detectar exfiltración con TShark</h4>
+          <span class="toggle-icon">▼</span>
+        </div>
+        <div class="tutorial-body">
+          <p>TShark puede detectar transferencias inusuales de datos analizando el tráfico de red en tiempo real. Señales de alerta: grandes volúmenes de datos salientes, conexiones a IPs desconocidas, tráfico DNS anómalo.</p>
+          <div class="code-block">
+            <div class="code-bar">
+              <span class="code-lang">bash — detección de exfiltración</span>
+              <button class="copy-btn" onclick="copyCode(this)">copiar</button>
+            </div>
+            <pre><span class="comment"># Monitorear transferencias grandes (frames > 1000 bytes)</span>
+<span class="cmd">sudo tshark</span> <span class="flag">-i</span> eth0 <span class="flag">-Y</span> <span class="string">"frame.len > 1000"</span> <span class="flag">-T</span> fields <span class="flag">-e</span> ip.src <span class="flag">-e</span> ip.dst <span class="flag">-e</span> frame.len
+
+<span class="comment"># Detectar tunneling DNS (exfiltración por DNS)</span>
+<span class="cmd">sudo tshark</span> <span class="flag">-i</span> eth0 <span class="flag">-Y</span> <span class="string">"dns.qry.name"</span> <span class="flag">-T</span> fields <span class="flag">-e</span> ip.src <span class="flag">-e</span> dns.qry.name
+
+<span class="comment"># Ver las IPs que más datos envían (en captura previa)</span>
+<span class="cmd">tshark</span> <span class="flag">-r</span> captura.pcap <span class="flag">-T</span> fields <span class="flag">-e</span> ip.src | <span class="cmd">sort</span> | <span class="cmd">uniq -c</span> | <span class="cmd">sort -nr</span> | <span class="cmd">head</span>
+
+<span class="comment"># Detectar conexiones HTTPS a dominios no reconocidos (SNI)</span>
+<span class="cmd">sudo tshark</span> <span class="flag">-i</span> eth0 <span class="flag">-Y</span> <span class="string">"tls.handshake.extensions_server_name"</span> \
+  <span class="flag">-T</span> fields <span class="flag">-e</span> ip.src <span class="flag">-e</span> tls.handshake.extensions_server_name</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="tutorial">
+        <div class="tutorial-header" onclick="toggleTutorial(this)">
+          <span class="step-badge">IPTABLES</span>
+          <h4>Reglas de firewall para prevenir exfiltración</h4>
+          <span class="toggle-icon">▼</span>
+        </div>
+        <div class="tutorial-body">
+          <div class="code-block">
+            <div class="code-bar">
+              <span class="code-lang">bash — iptables</span>
+              <button class="copy-btn" onclick="copyCode(this)">copiar</button>
+            </div>
+            <pre><span class="comment"># Bloquear tráfico saliente a una IP sospechosa</span>
+<span class="cmd">sudo iptables</span> <span class="flag">-A</span> OUTPUT <span class="flag">-d</span> 203.0.113.99 <span class="flag">-j</span> DROP
+
+<span class="comment"># Limitar transferencias salientes (rate limiting)</span>
+<span class="cmd">sudo iptables</span> <span class="flag">-A</span> OUTPUT <span class="flag">-p</span> tcp <span class="flag">-m</span> limit <span class="flag">--limit</span> 100/minute <span class="flag">-j</span> ACCEPT
+
+<span class="comment"># Registrar todo tráfico saliente inusual</span>
+<span class="cmd">sudo iptables</span> <span class="flag">-A</span> OUTPUT <span class="flag">-m</span> state <span class="flag">--state</span> NEW <span class="flag">-j</span> LOG <span class="flag">--log-prefix</span> <span class="string">"SALIDA-NUEVA: "</span>
+
+<span class="comment"># Ver reglas activas</span>
+<span class="cmd">sudo iptables</span> <span class="flag">-L -v -n</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="tutorial">
+        <div class="tutorial-header" onclick="toggleTutorial(this)">
+          <span class="step-badge purple">DLP</span>
+          <h4>Instalación de OpenDLP (herramienta DLP open source)</h4>
+          <span class="toggle-icon">▼</span>
+        </div>
+        <div class="tutorial-body">
+          <p>OpenDLP escanea sistemas de archivos en busca de datos sensibles como números de tarjetas, CURP, RFCs o correos electrónicos que no deberían estar almacenados sin cifrar.</p>
+          <div class="code-block">
+            <div class="code-bar">
+              <span class="code-lang">bash — grep como DLP básico</span>
+              <button class="copy-btn" onclick="copyCode(this)">copiar</button>
+            </div>
+            <pre><span class="comment"># Buscar números de tarjeta de crédito en archivos</span>
+<span class="cmd">grep</span> <span class="flag">-rE</span> <span class="string">"[0-9]{4}[- ]?[0-9]{4}[- ]?[0-9]{4}[- ]?[0-9]{4}"</span> /data/
+
+<span class="comment"># Buscar correos electrónicos expuestos</span>
+<span class="cmd">grep</span> <span class="flag">-rE</span> <span class="string">"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"</span> /data/
+
+<span class="comment"># Buscar CURP (México) en archivos</span>
+<span class="cmd">grep</span> <span class="flag">-rE</span> <span class="string">"[A-Z]{4}[0-9]{6}[HM][A-Z]{5}[0-9A-Z][0-9]"</span> /data/
+
+<span class="comment"># Contar coincidencias por archivo</span>
+<span class="cmd">grep</span> <span class="flag">-rEc</span> <span class="string">"[0-9]{4}[- ]?[0-9]{4}[- ]?[0-9]{4}[- ]?[0-9]{4}"</span> /data/ | <span class="cmd">grep</span> <span class="flag">-v</span> ":0"</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════ PRIVACIDAD ══════════════════ -->
+    <div id="privacidad" class="section">
+      <div class="section-header">
+        <div class="section-number">// 3.4</div>
+        <div class="section-title">Privacidad de Datos</div>
+        <div class="section-subtitle">Marcos legales, técnicas de anonimización y privacidad por diseño</div>
+      </div>
+
+      <p style="color:var(--muted); font-size:.88rem; line-height:1.75; margin-bottom:1.5rem;">
+        La <strong style="color:var(--text)">privacidad de datos</strong> es el derecho de las personas a controlar cómo se recopila, usa y comparte su información personal. Desde el punto de vista técnico, implica implementar mecanismos que garanticen que solo las personas autorizadas accedan a datos personales, y que esos datos se traten con el mínimo necesario para el fin declarado (<em>data minimization</em>).
+      </p>
+
+      <div class="tabs">
+        <div class="tab active" onclick="switchTab(this, 'tab-marcos')">Marcos Legales</div>
+        <div class="tab" onclick="switchTab(this, 'tab-anon')">Anonimización</div>
+        <div class="tab" onclick="switchTab(this, 'tab-pbd')">Privacy by Design</div>
+      </div>
+
+      <div id="tab-marcos" class="tab-content active">
+        <div class="cards-grid">
+          <div class="card">
+            <div class="card-icon">🇪🇺</div>
+            <h3>GDPR (Europa)</h3>
+            <p>Reglamento General de Protección de Datos. Aplica a cualquier organización que procese datos de ciudadanos europeos. Requiere consentimiento explícito, derecho al olvido y notificación de brechas en 72 horas. Multas de hasta el 4% de facturación global.</p>
+          </div>
+          <div class="card">
+            <div class="card-icon">🇲🇽</div>
+            <h3>LFPDPPP (México)</h3>
+            <p>Ley Federal de Protección de Datos Personales en Posesión de Particulares. Requiere aviso de privacidad, consentimiento y procedimientos ARCO (Acceso, Rectificación, Cancelación y Oposición). Regulada por el INAI.</p>
+          </div>
+          <div class="card">
+            <div class="card-icon">🌐</div>
+            <h3>ISO/IEC 27701</h3>
+            <p>Extensión de ISO 27001 para gestión de privacidad. Define controles para procesar datos personales de forma segura y conforme a regulaciones. Complementa cualquier marco legal.</p>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-anon" class="tab-content">
+        <div class="subsection-title"><span>Técnicas</span> Anonimización y Pseudonimización</div>
+        <p style="color:var(--muted); font-size:.85rem; line-height:1.7; margin-bottom:1rem;">
+          <strong style="color:var(--text)">Anonimización</strong>: elimina todos los identificadores de forma irreversible. <strong style="color:var(--text)">Pseudonimización</strong>: reemplaza identificadores con tokens; los datos pueden re-identificarse con la clave correcta (más útil para análisis).
+        </p>
+        <div class="code-block">
+          <div class="code-bar">
+            <span class="code-lang">bash — anonimizar CSV</span>
+            <button class="copy-btn" onclick="copyCode(this)">copiar</button>
+          </div>
+          <pre><span class="comment"># Reemplazar columna de nombres con hash SHA-256 (pseudonimización)</span>
+<span class="cmd">awk</span> <span class="flag">-F','</span> <span class="string">'NR>1{cmd="echo -n "$1" | sha256sum | cut -d\" \" -f1"; cmd | getline hash; close(cmd); print hash","$2","$3}'</span> datos.csv
+
+<span class="comment"># Eliminar columna de nombre (anonimización simple con cut)</span>
+<span class="cmd">cut</span> <span class="flag">-d',' -f2,3,4</span> datos.csv > datos_anonimizados.csv
+
+<span class="comment"># Enmascarar correos: juan@mail.com → j***@mail.com</span>
+<span class="cmd">sed</span> <span class="flag">-E</span> <span class="string">'s/([a-zA-Z])[a-zA-Z0-9._%+-]+(@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/\1***\2/g'</span> datos.csv</pre>
+        </div>
+      </div>
+
+      <div id="tab-pbd" class="tab-content">
+        <div class="subsection-title"><span>Principios</span> Privacy by Design</div>
+        <p style="color:var(--muted); font-size:.85rem; line-height:1.7; margin-bottom:1rem;">
+          Desarrollado por Ann Cavoukian. La privacidad se construye en el sistema desde el diseño inicial, no como un parche posterior. 7 principios fundamentales:
+        </p>
+        <ul class="checklist">
+          <li><span class="check-box">✓</span><span>Proactivo, no reactivo: anticipar problemas de privacidad antes de que ocurran</span></li>
+          <li><span class="check-box">✓</span><span>Privacidad como configuración predeterminada (opt-in, no opt-out)</span></li>
+          <li><span class="check-box">✓</span><span>Privacidad integrada en el diseño del sistema, no añadida al final</span></li>
+          <li><span class="check-box">✓</span><span>Funcionalidad completa: privacidad Y seguridad, no una a costa de la otra</span></li>
+          <li><span class="check-box">✓</span><span>Seguridad de extremo a extremo durante todo el ciclo de vida del dato</span></li>
+          <li><span class="check-box">✓</span><span>Visibilidad y transparencia hacia los usuarios</span></li>
+          <li><span class="check-box">✓</span><span>Respeto por la privacidad del usuario: mantener enfoque centrado en el usuario</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ══════════════════ TSHARK ══════════════════ -->
+    <div id="tshark" class="section">
+      <div class="section-header">
+        <div class="section-number">// REFERENCIA</div>
+        <div class="section-title">TShark — Comandos de Clase</div>
+        <div class="section-subtitle">Todos los comandos del lunes 13 de abril de 2026, explicados</div>
+      </div>
+
+      <p style="color:var(--muted); font-size:.88rem; line-height:1.75; margin-bottom:1.5rem;">
+        <strong style="color:var(--text)">TShark</strong> es la versión de línea de comandos de Wireshark. Permite capturar y analizar tráfico de red en tiempo real o desde archivos PCAP. Es esencial para detectar intrusiones, analizar comportamiento de red y entender protocolos.
+      </p>
+
+      <div class="tabs">
+        <div class="tab active" onclick="switchTab(this, 'ts-interfaces')">Interfaces</div>
+        <div class="tab" onclick="switchTab(this, 'ts-tcp')">TCP/IP</div>
+        <div class="tab" onclick="switchTab(this, 'ts-dns')">DNS</div>
+        <div class="tab" onclick="switchTab(this, 'ts-http')">HTTP/TLS</div>
+        <div class="tab" onclick="switchTab(this, 'ts-stats')">Estadísticas</div>
+      </div>
+
+      <div id="ts-interfaces" class="tab-content active">
+        <div class="code-block">
+          <div class="code-bar">
+            <span class="code-lang">bash — interfaces y captura básica</span>
+            <button class="copy-btn" onclick="copyCode(this)">copiar</button>
+          </div>
+          <pre><span class="comment"># Ver interfaces disponibles para captura</span>
+<span class="cmd">tshark</span> <span class="flag">-D</span>
+
+<span class="comment"># Captura en tiempo real en eth0 (tráfico general)</span>
+<span class="cmd">sudo tshark</span> <span class="flag">-i</span> eth0
+
+<span class="comment"># Guardar captura en archivo pcap</span>
+<span class="cmd">sudo tshark</span> <span class="flag">-i</span> eth0 <span class="flag">-w</span> captura.pcap
+
+<span class="comment"># Leer captura sin resolver nombres (más rápido)</span>
+<span class="cmd">tshark</span> <span class="flag">-r</span> captura.pcap <span class="flag">-n</span></pre>
+        </div>
+      </div>
+
+      <div id="ts-tcp" class="tab-content">
+        <div class="code-block">
+          <div class="code-bar">
+            <span class="code-lang">bash — filtros TCP</span>
+            <button class="copy-btn" onclick="copyCode(this)">copiar</button>
+          </div>
+          <pre><span class="comment"># Solo tráfico TCP / UDP</span>
+<span class="cmd">sudo tshark</span> <span class="flag">-i</span> eth0 <span class="flag">-f</span> <span class="string">"tcp"</span>
+<span class="cmd">sudo tshark</span> <span class="flag">-i</span> eth0 <span class="flag">-f</span> <span class="string">"udp"</span>
+
+<span class="comment"># Paquetes SYN (inicio de conexión / escaneo de puertos)</span>
+<span class="cmd">sudo tshark</span> <span class="flag">-i</span> eth0 <span class="flag">-Y</span> <span class="string">"tcp.flags.syn == 1 && tcp.flags.ack == 0"</span>
+
+<span class="comment"># Respuestas SYN-ACK del servidor</span>
+<span class="cmd">sudo tshark</span> <span class="flag">-i</span> eth0 <span class="flag">-Y</span> <span class="string">"tcp.flags.syn == 1 && tcp.flags.ack == 1"</span>
+
+<span class="comment"># Paquetes RST (rechazos y cierres bruscos)</span>
+<span class="cmd">sudo tshark</span> <span class="flag">-i</span> eth0 <span class="flag">-Y</span> <span class="string">"tcp.flags.reset == 1"</span>
+
+<span class="comment"># Retransmisiones (pérdida / congestión)</span>
+<span class="cmd">sudo tshark</span> <span class="flag">-i</span> eth0 <span class="flag">-Y</span> <span class="string">"tcp.analysis.retransmission"</span>
+
+<span class="comment"># ICMP: echo request (barridos ping)</span>
+<span class="cmd">sudo tshark</span> <span class="flag">-i</span> eth0 <span class="flag">-Y</span> <span class="string">"icmp.type == 8"</span></pre>
+        </div>
+      </div>
+
+      <div id="ts-dns" class="tab-content">
+        <div class="code-block">
+          <div class="code-bar">
+            <span class="code-lang">bash — análisis DNS</span>
+            <button class="copy-btn" onclick="copyCode(this)">copiar</button>
+          </div>
+          <pre><span class="comment"># Todo el tráfico DNS</span>
+<span class="cmd">sudo tshark</span> <span class="flag">-i</span> eth0 <span class="flag">-Y</span> <span class="string">"dns"</span>
+
+<span class="comment"># Solo consultas DNS (no respuestas)</span>
+<span class="cmd">sudo tshark</span> <span class="flag">-i</span> eth0 <span class="flag">-Y</span> <span class="string">"dns.flags.response == 0"</span>
+
+<span class="comment"># Extraer IP origen + dominio consultado (detectar tunneling)</span>
+<span class="cmd">sudo tshark</span> <span class="flag">-i</span> eth0 <span class="flag">-Y</span> <span class="string">"dns.qry.name"</span> <span class="flag">-T</span> fields <span class="flag">-e</span> ip.src <span class="flag">-e</span> dns.qry.name
+
+<span class="comment"># ARP: respuestas con MAC e IP (detectar ARP spoofing)</span>
+<span class="cmd">sudo tshark</span> <span class="flag">-i</span> eth0 <span class="flag">-Y</span> <span class="string">"arp.opcode == 2"</span> <span class="flag">-T</span> fields <span class="flag">-e</span> eth.src <span class="flag">-e</span> arp.src.proto_ipv4</pre>
+        </div>
+      </div>
+
+      <div id="ts-http" class="tab-content">
+        <div class="code-block">
+          <div class="code-bar">
+            <span class="code-lang">bash — HTTP y TLS</span>
+            <button class="copy-btn" onclick="copyCode(this)">copiar</button>
+          </div>
+          <pre><span class="comment"># Tráfico HTTP decodificado</span>
+<span class="cmd">sudo tshark</span> <span class="flag">-i</span> eth0 <span class="flag">-Y</span> <span class="string">"http"</span>
+
+<span class="comment"># IP, método, host y URI de peticiones HTTP</span>
+<span class="cmd">sudo tshark</span> <span class="flag">-i</span> eth0 <span class="flag">-Y</span> <span class="string">"http.request"</span> <span class="flag">-T</span> fields \
+  <span class="flag">-e</span> ip.src <span class="flag">-e</span> http.request.method <span class="flag">-e</span> http.host <span class="flag">-e</span> http.request.uri
+
+<span class="comment"># User agents HTTP (detectar bots o herramientas)</span>
+<span class="cmd">sudo tshark</span> <span class="flag">-i</span> eth0 <span class="flag">-Y</span> <span class="string">"http.user_agent"</span> <span class="flag">-T</span> fields <span class="flag">-e</span> ip.src <span class="flag">-e</span> http.user_agent
+
+<span class="comment"># Handshakes TLS</span>
+<span class="cmd">sudo tshark</span> <span class="flag">-i</span> eth0 <span class="flag">-Y</span> <span class="string">"tls.handshake"</span>
+
+<span class="comment"># SNI en TLS (dominio destino en conexión cifrada)</span>
+<span class="cmd">sudo tshark</span> <span class="flag">-i</span> eth0 <span class="flag">-Y</span> <span class="string">"tls.handshake.extensions_server_name"</span> \
+  <span class="flag">-T</span> fields <span class="flag">-e</span> ip.src <span class="flag">-e</span> tls.handshake.extensions_server_name</pre>
+        </div>
+      </div>
+
+      <div id="ts-stats" class="tab-content">
+        <div class="code-block">
+          <div class="code-bar">
+            <span class="code-lang">bash — estadísticas y análisis</span>
+            <button class="copy-btn" onclick="copyCode(this)">copiar</button>
+          </div>
+          <pre><span class="comment"># IPs origen más frecuentes</span>
+<span class="cmd">tshark</span> <span class="flag">-r</span> captura.pcap <span class="flag">-T</span> fields <span class="flag">-e</span> ip.src | <span class="cmd">sort</span> | <span class="cmd">uniq -c</span> | <span class="cmd">sort -nr</span> | <span class="cmd">head</span>
+
+<span class="comment"># Puertos destino más frecuentes</span>
+<span class="cmd">tshark</span> <span class="flag">-r</span> captura.pcap <span class="flag">-T</span> fields <span class="flag">-e</span> tcp.dstport <span class="flag">-e</span> udp.dstport | <span class="cmd">tr '\t' '\n'</span> | <span class="cmd">grep -v</span> <span class="string">'^$'</span> | <span class="cmd">sort</span> | <span class="cmd">uniq -c</span> | <span class="cmd">sort -nr</span> | <span class="cmd">head</span>
+
+<span class="comment"># Resumen de conversaciones TCP</span>
+<span class="cmd">tshark</span> <span class="flag">-r</span> captura.pcap <span class="flag">-q -z</span> conv,tcp
+
+<span class="comment"># Jerarquía de protocolos</span>
+<span class="cmd">tshark</span> <span class="flag">-r</span> captura.pcap <span class="flag">-q -z</span> io,phs
+
+<span class="comment"># Estadísticas de tráfico por segundo</span>
+<span class="cmd">tshark</span> <span class="flag">-r</span> captura.pcap <span class="flag">-q -z</span> io,stat,1</pre>
+        </div>
+
+        <div class="subsection-title" style="margin-top:1.5rem;"><span>Ejemplo</span> Distribución de tráfico simulada</div>
+        <table class="data-table">
+          <thead>
+            <tr><th>IP Origen</th><th>Paquetes</th><th>Protocolo</th><th>Estado</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>192.168.1.101</td><td>4,821</td><td>HTTP/HTTPS</td><td><span class="badge badge-green">NORMAL</span></td></tr>
+            <tr><td>192.168.1.205</td><td>12,340</td><td>DNS</td><td><span class="badge badge-yellow">ALTO</span></td></tr>
+            <tr><td>10.0.0.55</td><td>891</td><td>TCP SYN</td><td><span class="badge badge-red">ESCANEO</span></td></tr>
+            <tr><td>192.168.1.77</td><td>234</td><td>ICMP</td><td><span class="badge badge-green">NORMAL</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div><!-- end content-area -->
+</div><!-- end main -->
+
+<script>
+function showSection(id, el) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if (el) el.classList.add('active');
+}
+
+function toggleTutorial(header) {
+  header.parentElement.classList.toggle('open');
+}
+
+function switchTab(tab, contentId) {
+  const parent = tab.closest('.section') || document.body;
+  parent.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  parent.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  tab.classList.add('active');
+  const target = parent.querySelector('#' + contentId) || document.getElementById(contentId);
+  if (target) target.classList.add('active');
+}
+
+function copyCode(btn) {
+  const pre = btn.closest('.code-block').querySelector('pre');
+  const text = pre.innerText || pre.textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = '✓ copiado';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'copiar'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+function checkItem(li, progressId, listId) {
+  li.classList.toggle('done');
+  if (!li.querySelector('.check-box').textContent.trim()) {
+    li.querySelector('.check-box').textContent = li.classList.contains('done') ? '✓' : '';
+  } else {
+    li.querySelector('.check-box').textContent = li.classList.contains('done') ? '✓' : '';
+  }
+  const list = document.getElementById(listId);
+  const total = list.querySelectorAll('li').length;
+  const done = list.querySelectorAll('li.done').length;
+  const fill = document.getElementById(progressId);
+  fill.style.width = ((done / total) * 100) + '%';
+}
+
+// Highlight nav on card click
+document.querySelectorAll('.card[onclick]').forEach(card => {
+  card.style.cursor = 'pointer';
+});
+</script>
+</body>
+</html>
